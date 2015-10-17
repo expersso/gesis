@@ -10,7 +10,7 @@ login_gesis(remDr, user = getOption("gesis_user"),
 \arguments{
 \item{remDr}{The remote driver object created with \code{setup_gesis}.}
 
-\item{user,}{pass Your GESIS user name and password.}
+\item{user,pass}{Your GESIS user name and password.}
 }
 \value{
 Nothing.

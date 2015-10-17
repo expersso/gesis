@@ -65,7 +65,7 @@ setup_gesis <- function(download_dir = ".",
 #' Create connection with GESIS and log in.
 #'
 #' @param remDr The remote driver object created with \code{setup_gesis}.
-#' @param user, pass Your GESIS user name and password.
+#' @param user,pass Your GESIS user name and password.
 #'
 #' @return Nothing.
 #'
@@ -151,6 +151,16 @@ download_dataset <- function(remDr, doi, filetype = "dta") {
 #'
 #' @export
 browse_codebook <- function(doi, browseURL = TRUE, ...) {
+
+  if (!requireNamespace("xml2", quietly = TRUE)) {
+      stop("xml2 package needed for this function to work. Please install it.",
+           call. = FALSE)
+  }
+
+  if (!requireNamespace("rvest", quietly = TRUE)) {
+      stop("rvest package needed for this function to work. Please install it.",
+           call. = FALSE)
+    }
 
   doi <- as.character(doi)
   base_url <- "https://dbk.gesis.org/dbksearch/"

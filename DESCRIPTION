@@ -4,6 +4,13 @@ Title: R Client for GESIS Data Catalogue (DBK)
 Version: 0.1
 Date: 2015-10-17
 Authors@R: person("Bill", "Clay", email = "expersso5@gmail.com", role = c("aut", "cre"))
-Description: Provides programmatic access to the GESIS data repository.
-License: CCO
+Description: Provides programmatic access to the GESIS Data
+    Catalogue/Datenbestandkatalog (DBK).
+License: CC0
 LazyData: TRUE
+Suggests: knitr,
+    rmarkdown,
+    rvest,
+    xml2
+VignetteBuilder: knitr
+Imports: RSelenium
