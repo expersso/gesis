@@ -157,19 +157,19 @@ browse_codebook <- function(doi, browseURL = TRUE, ...) {
            call. = FALSE)
   }
 
-  if (!requireNamespace("rvest", quietly = TRUE)) {
-      stop("rvest package needed for this function to work. Please install it.",
-           call. = FALSE)
-    }
-
   doi <- as.character(doi)
   base_url <- "https://dbk.gesis.org/dbksearch/"
   url <- paste0(base_url, "SDesc2.asp?ll=10&notabs=1&no=", doi)
   page <- xml2::read_html(url)
-  codebook_link <- rvest::html_nodes(page,
-                                     xpath = "//a[contains(text(), 'cdb.pdf')]")
-  codebook_link_href <- paste0(base_url,
-                               rvest::html_attr(codebook_link, "href"))
+  codebook_link <- xml2::xml_find_all(page, "//a[contains(text(), 'cdb.pdf')]")
+
+  if(length(codebook_link) == 0) {
+      message(paste0("No codebook appears to be available.",
+                     "You might want to try to look for it manually:\n", url))
+      return(invisible())
+  }
+
+  codebook_link_href <- paste0(base_url, xml2::xml_attr(codebook_link, "href"))
 
   if(browseURL) {
     browseURL(codebook_link_href, ...)
