@@ -4,8 +4,9 @@ Title: R Client for GESIS Data Catalogue (DBK)
 Version: 0.1
 Date: 2015-11-29
 Authors@R: person("Eric", "Persson", email = "expersso5@gmail.com", role = c("aut", "cre"))
-Description: Provides programmatic access to the GESIS Data
-    Catalogue/Datenbestandkatalog (DBK).
+Description: Provides programmatic access to the GESIS - Leibniz-Institute for
+    the Social Sciences Data Catalogue/Datenbestandkatalog (DBK), which
+    maintains a large repository of data sets related to the social sciences.
 License: CC0
 LazyData: TRUE
 Suggests: knitr,
