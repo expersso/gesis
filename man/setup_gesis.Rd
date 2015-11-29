@@ -45,6 +45,8 @@ Most GESIS datasets are .dta or .spss files, which are of MIME type
   GESIS (\code{gesis_login})} \item{Download a specified dataset
   (\code{download_dataset})} \item{(optional) Manually closing the Selenium
   server (remDr$close(); remDr$closeServer())} }
+
+  The \code{setup_gesis} function currently only supports Firefox. So if you want to use a different browser, it is recommended that you look at the code in that function, and the documentation in the \code{RSelenium} (\href{https://cran.r-project.org/web/packages/RSelenium/vignettes/RSelenium-saucelabs.html}) package on how to set up a remote driver using other browsers. Once you have successfully initiated a remote browser with a different browser, the subsequent steps in the workflow should work as described in this documentation.
 }
 \examples{
 \dontrun{

@@ -4,7 +4,8 @@
 \alias{download_dataset}
 \title{Download dataset from GESIS}
 \usage{
-download_dataset(remDr, doi, filetype = "dta")
+download_dataset(remDr, doi, filetype = "dta", purpose = 1,
+  message = TRUE)
 }
 \arguments{
 \item{remDr}{Selenium remote driver created with \code{setup_gesis}.}
@@ -12,6 +13,10 @@ download_dataset(remDr, doi, filetype = "dta")
 \item{doi}{The unique identifier for the dataset to be downloaded (see details).}
 
 \item{filetype}{The filetype to be downloaded (usually only "dta" or "spss" available).}
+
+\item{purpose}{The purpose for which you are downloading the data set (see details).}
+
+\item{message}{If TRUE, outputs a message showing which data set is being downloaded.}
 }
 \value{
 Downloads a file.
@@ -20,7 +25,19 @@ Downloads a file.
 Download dataset from GESIS identified by its Document Object Identifier (DOI) and filetype
 }
 \details{
-Datasets reposited with GESIS are uniquely identified with a numberic identifier called a "DOI". This identifier appears both in the URL for a dataset's website, and on the website itself.
+Datasets reposited with GESIS are uniquely identified with a
+  numberic identifier called a "DOI". This identifier appears both in the URL
+  for a dataset's website, and on the website itself.
+
+  In addition to accepting the terms of use, you need to input a purpose for
+  downloading a data set. The options are as follows:
+
+1. for scientific research (incl. PhD)
+2. for reserach with commercial mandate
+3. for teaching as lecturer
+4. for my academic studies
+5. for my final exam (e.g. bachelor or master)
+6. for professional training and qualification
 }
 \examples{
 \dontrun{
