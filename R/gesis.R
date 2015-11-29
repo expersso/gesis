@@ -34,12 +34,12 @@
 #'
 #'   The \code{setup_gesis} function currently only supports Firefox. So if you
 #'   want to use a different browser, it is recommended that you look at the
-#'   code in that function, and the documentation in the \code{RSelenium}
-#'   (\href{https://cran.r-project.org/web/packages/RSelenium/vignettes/RSelenium-saucelabs.html})
-#'   package on how to set up a remote driver using other browsers. Once you
-#'   have successfully initiated a remote browser with a different browser, the
-#'   subsequent steps in the workflow should work as described in this
-#'   documentation.
+#'   code in that function, and the
+#'   \href{https://cran.r-project.org/web/packages/RSelenium/vignettes/RSelenium-saucelabs.html}{documentation}
+#'   in the \code{RSelenium} package on how to set up a remote driver using
+#'   other browsers. Once you have successfully initiated a remote browser with
+#'   a different browser, the subsequent steps in the workflow should work as
+#'   described in this documentation.
 #'
 #' @return A Selenium remote driver.
 #'
@@ -47,12 +47,10 @@
 #' \dontrun{
 #' gesis_remDr <- setup_gesis(download_dir = "downloads")
 #' login_gesis(gesis_remDr, user = "myusername", pass = "mypassword")
-#' download_dataset(gesis_remDr, doi = "5928")
+#' download_dataset(gesis_remDr, doi = 5928)
 #' }
-#'
 #' @export
-setup_gesis <- function(download_dir = ".",
-                        file_mime = "application/octet-stream") {
+setup_gesis <- function(download_dir = ".", file_mime = "application/octet-stream") {
 
   # set firefox properties to not open download dialog
   fprof <- RSelenium::makeFirefoxProfile(list(
@@ -82,7 +80,7 @@ setup_gesis <- function(download_dir = ".",
 #' \dontrun{
 #' gesis_remDr <- setup_gesis(download_dir = "downloads")
 #' login_gesis(gesis_remDr, user = "myusername", pass = "mypassword")
-#' download_dataset(gesis_remDr, doi = "5928")
+#' download_dataset(gesis_remDr, doi = 5928)
 #' }
 #'
 #' @export
@@ -132,8 +130,7 @@ login_gesis <- function(remDr,
 #' }
 #'
 #' @export
-download_dataset <- function(remDr, doi, filetype = "dta", purpose = 1,
-                             msg = TRUE) {
+download_dataset <- function(remDr, doi, filetype = "dta", purpose = 1, msg = TRUE) {
 
     if(msg) message("Downloading DOI: ", doi, sprintf(" (%s)", Sys.time()))
 

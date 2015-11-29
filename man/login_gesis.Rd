@@ -22,7 +22,7 @@ Create connection with GESIS and log in.
 \dontrun{
 gesis_remDr <- setup_gesis(download_dir = "downloads")
 login_gesis(gesis_remDr, user = "myusername", pass = "mypassword")
-download_dataset(gesis_remDr, doi = "5928")
+download_dataset(gesis_remDr, doi = 5928)
 }
 }
 

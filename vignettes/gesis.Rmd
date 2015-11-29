@@ -18,9 +18,9 @@ package seeks to solve this issue through the use of
 
 To install the package from github:
 
-```{r}
-library(devtools)
-install_github("expersso/gesis")
+```{r, eval=FALSE}
+# install.packages("devtools")
+devtools::install_github("expersso/gesis")
 ```
 
 In essence, the `gesis` package allows the user to emulate a web browser

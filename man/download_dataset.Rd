@@ -4,8 +4,7 @@
 \alias{download_dataset}
 \title{Download dataset from GESIS}
 \usage{
-download_dataset(remDr, doi, filetype = "dta", purpose = 1,
-  message = TRUE)
+download_dataset(remDr, doi, filetype = "dta", purpose = 1, msg = TRUE)
 }
 \arguments{
 \item{remDr}{Selenium remote driver created with \code{setup_gesis}.}
@@ -16,7 +15,7 @@ download_dataset(remDr, doi, filetype = "dta", purpose = 1,
 
 \item{purpose}{The purpose for which you are downloading the data set (see details).}
 
-\item{message}{If TRUE, outputs a message showing which data set is being downloaded.}
+\item{msg}{If TRUE, outputs a message showing which data set is being downloaded.}
 }
 \value{
 Downloads a file.
@@ -43,7 +42,7 @@ Datasets reposited with GESIS are uniquely identified with a
 \dontrun{
 gesis_remDr <- setup_gesis(download_dir = "downloads")
 login_gesis(gesis_remDr, user = "myusername", pass = "mypassword")
-download_dataset(gesis_remDr, doi = "5928")
+download_dataset(gesis_remDr, doi = 5928)
 }
 }
 
