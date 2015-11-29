@@ -191,6 +191,13 @@ browse_codebook <- function(doi, browseURL = TRUE, ...) {
   url <- paste0(base_url, "SDesc2.asp?ll=10&notabs=1&no=", doi)
   page <- xml2::read_html(url)
   codebook_link <- xml2::xml_find_all(page, "//a[contains(text(), 'cdb.pdf')]")
+
+  if(length(codebook_link) == 0) {
+      message("No codebook appears to be available. ",
+              "You might want to try to look for it manually:\n", url)
+      return(invisible())
+  }
+
   codebook_link_href <- paste0(base_url, xml2::xml_attr(codebook_link, "href"))
 
   if(browseURL) {
