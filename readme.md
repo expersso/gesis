@@ -1,12 +1,7 @@
 ---
 title: "Programmatic access to the GESIS Data Catalogue (DBK)"
-author: "Eric Persson"
-date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Programmatic access to the GESIS Data Catalogue (DBK)}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+date: "2015-11-29"
+output: html_document
 ---
 
 ## Introduction
@@ -15,6 +10,14 @@ approximately 5,000 datasets. Due to a lack of an API, however, accessing these
 datasets in a programmatic and reproducible way is difficult. The `gesis`
 package seeks to solve this issue through the use of
 [Selenium](http://www.seleniumhq.org/) and the `RSelenium` package. 
+
+To install the package from github:
+
+
+```r
+# install.packages("devtools")
+devtools::install_github("expersso/gesis")
+```
 
 In essence, the `gesis` package allows the user to emulate a web browser
 session, wherein he or she logs in to the GESIS website, browses to the data set
@@ -41,7 +44,8 @@ can be downloaded without prompting the user. (NB: The `setup_gesis` function
 currently only supports Firefox. See the help file for how to use other
 browsers.)
 
-```{r setup, eval=FALSE}
+
+```r
 if(!dir.exists("downloads")) dir.create("downloads")
 gesis_remDr <- setup_gesis(download_dir = "downloads")
 ```
@@ -56,7 +60,8 @@ in a script, the default behavior is to fetch these as options using
 these in your `.Rprofile` by `option("gesis_user" = "myusername", "gesis_pass" =
 "mypassword")`.)
 
-```{r, eval=FALSE}
+
+```r
 login_gesis(gesis_remDr, user = "myusername", pass = "mypassword")
 ```
 
@@ -65,7 +70,8 @@ logged in. Now all we have to do is figure out the unique identifier for the
 data set we are interested in. This is called a "DOI" and can be found on every
 data set's description page.
 
-```{r, eval=FALSE}
+
+```r
 download_dataset(gesis_remDr, doi = 5928, filetype = "dta", purpose = 1)
 ```
 
@@ -84,7 +90,8 @@ The above function will:
 Finally, we can now check that the downloaded file is in the folder we
 specified, and then close the browser window and the Selenium server.
 
-```{r, eval=FALSE}
+
+```r
 dir("downloads")
 gesis_remDr$Close()
 gesis_remDr$closeServer()
@@ -95,7 +102,8 @@ for browsing the codebook of a specified dataset. This function does not require
 an active Selenium session, but *does* require that the `xml2` package be
 installed:
 
-```{r, eval=FALSE}
+
+```r
 browse_codebook(doi = 5928)
 ```
 
@@ -112,7 +120,8 @@ An example of such a repeated cross-section is a study called "Atlantic Trends",
 for which there are annual surveys between 2002 and 2013. We can easily scrape
 the DOI for these data sets.
 
-```{r}
+
+```r
 library(xml2)
 
 # Browsing the gesis website, we find the url for the main page for these studies
@@ -124,10 +133,15 @@ doi <- substr(xml_text(doi_links), 3, 7)
 str(doi)
 ```
 
+```
+##  chr [1:16] "4218" "4219" "4220" "4262" "4518" "4746" ...
+```
+
 Using the `gesis` package just like before, we can now batch download all these
 surveys:
 
-```{r, eval = FALSE}
+
+```r
 # Setup preliminaries
 if(!dir.exists("downloads")) dir.create("downloads")
 gesis_remDr <- setup_gesis(download_dir = "downloads")

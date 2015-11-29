@@ -1,12 +1,7 @@
 ---
 title: "Programmatic access to the GESIS Data Catalogue (DBK)"
-author: "Eric Persson"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Programmatic access to the GESIS Data Catalogue (DBK)}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+output: html_document
 ---
 
 ## Introduction
@@ -15,6 +10,13 @@ approximately 5,000 datasets. Due to a lack of an API, however, accessing these
 datasets in a programmatic and reproducible way is difficult. The `gesis`
 package seeks to solve this issue through the use of
 [Selenium](http://www.seleniumhq.org/) and the `RSelenium` package. 
+
+To install the package from github:
+
+```{r, eval=FALSE}
+# install.packages("devtools")
+devtools::install_github("expersso/gesis")
+```
 
 In essence, the `gesis` package allows the user to emulate a web browser
 session, wherein he or she logs in to the GESIS website, browses to the data set
