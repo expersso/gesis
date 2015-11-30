@@ -1,8 +1,11 @@
 ---
 title: "Programmatic access to the GESIS Data Catalogue (DBK)"
-date: "2015-11-29"
+date: "2015-11-30"
 output: html_document
 ---
+
+[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/gesis)](http://cran.r-project.org/package=gesis)
+[![](http://cranlogs.r-pkg.org/badges/grand-total/gesis)](http://cran.r-project.org/web/packages/gesis)
 
 ## Introduction
 The [GESIS Data Catalogue](https://dbk.gesis.org/) offers a repository of 
