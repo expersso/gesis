@@ -1,130 +1,90 @@
----
-title: "Programmatic access to the GESIS Data Catalogue (DBK)"
-date: "2015-11-30"
-output: html_document
----
+Gesis
+=====
 
-[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/gesis)](http://cran.r-project.org/package=gesis)
-[![](http://cranlogs.r-pkg.org/badges/grand-total/gesis)](http://cran.r-project.org/web/packages/gesis)
+[![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/gesis)](http://cran.r-project.org/package=gesis) [![](http://cranlogs.r-pkg.org/badges/grand-total/gesis)](http://cran.r-project.org/web/packages/gesis)
 
-## Introduction
-The [GESIS Data Catalogue](https://dbk.gesis.org/) offers a repository of 
-approximately 5,000 datasets. Due to a lack of an API, however, accessing these
-datasets in a programmatic and reproducible way is difficult. The `gesis`
-package seeks to solve this issue through the use of
-[Selenium](http://www.seleniumhq.org/) and the `RSelenium` package. 
+Introduction
+------------
+
+The [GESIS Data Catalogue](https://dbk.gesis.org/) offers a repository of approximately 5,000 datasets. Due to a lack of an API, however, accessing these datasets in a programmatic and reproducible way is difficult. The `gesis` package seeks to solve this issue through the use of [Selenium](http://www.seleniumhq.org/) and the `RSelenium` package.
 
 To install the package from github:
 
+``` r
+knitr::opts_chunk$set(eval = FALSE)
+```
 
-```r
+``` r
 # install.packages("devtools")
 devtools::install_github("expersso/gesis")
 ```
 
-In essence, the `gesis` package allows the user to emulate a web browser
-session, wherein he or she logs in to the GESIS website, browses to the data set
-of interest, clicks to download that dataset, agrees to accept the terms of use,
-and, ultimately, downloads the dataset. This whole process can be done through
-`R` with these three steps:
+In essence, the `gesis` package allows the user to emulate a web browser session, wherein he or she logs in to the GESIS website, browses to the data set of interest, clicks to download that dataset, agrees to accept the terms of use, and, ultimately, downloads the dataset. This whole process can be done through `R` with these three steps:
 
-1. Initiating a Selenium server (`setup_gesis`)
-1. Logging in to GESIS (`gesis_login`)
-1. Downloading a specified dataset (`download_dataset`)
+1.  Initiating a Selenium server (`setup_gesis`)
+2.  Logging in to GESIS (`gesis_login`)
+3.  Downloading a specified dataset (`download_dataset`)
 
-The next section describes this workflow by working through a simple example. An
-second example then shows how the package can be leveraged for more advanced
-uses.
+The next section describes this workflow by working through a simple example. An second example then shows how the package can be leveraged for more advanced uses.
 
-## A simple example
+A simple example
+----------------
 
-The first step to using the `gesis` package is always to set up a Selenium 
-remote driver by running `setup_gesis`. This function takes care of all the 
-preliminaries for using Selenium, including checking for the existence of a 
-Selenium server, starting such a server, creating a remote driver, and opening a
-web browser window. In addition, it specifies browser settings such that files 
-can be downloaded without prompting the user. (NB: The `setup_gesis` function
-currently only supports Firefox. See the help file for how to use other
-browsers.)
+The first step to using the `gesis` package is always to set up a Selenium remote driver by running `setup_gesis`. This function takes care of all the preliminaries for using Selenium, including checking for the existence of a Selenium server, starting such a server, creating a remote driver, and opening a web browser window. In addition, it specifies browser settings such that files can be downloaded without prompting the user. (NB: The `setup_gesis` function currently only supports Firefox. See the help file for how to use other browsers.)
 
-
-```r
+``` r
 if(!dir.exists("downloads")) dir.create("downloads")
 gesis_remDr <- setup_gesis(download_dir = "downloads")
 ```
 
-An empty browser window should now pop up. Leave this window open; this is where
-we will emulate a session to access the GESIS website.
+An empty browser window should now pop up. Leave this window open; this is where we will emulate a session to access the GESIS website.
 
-Next we go to the GESIS main page and log in by providing our user name and 
-password. (To avoid having to provide the user name and password in plain text 
-in a script, the default behavior is to fetch these as options using 
-`getOption("gesis_user")` and `getOption("gesis_pass")`. You can thus specify 
-these in your `.Rprofile` by `option("gesis_user" = "myusername", "gesis_pass" =
-"mypassword")`.)
+Next we go to the GESIS main page and log in by providing our user name and password. (To avoid having to provide the user name and password in plain text in a script, the default behavior is to fetch these as options using `getOption("gesis_user")` and `getOption("gesis_pass")`. You can thus specify these in your `.Rprofile` by `option("gesis_user" = "myusername", "gesis_pass" = "mypassword")`.)
 
-
-```r
+``` r
 login_gesis(gesis_remDr, user = "myusername", pass = "mypassword")
 ```
 
-Switching to the browser window opened earlier, we should now see that we are
-logged in. Now all we have to do is figure out the unique identifier for the
-data set we are interested in. This is called a "DOI" and can be found on every
-data set's description page.
+Switching to the browser window opened earlier, we should now see that we are logged in. Now all we have to do is figure out the unique identifier for the data set we are interested in. This is called a "DOI" and can be found on every data set's description page.
 
-
-```r
+``` r
 download_dataset(gesis_remDr, doi = 5928, filetype = "dta", purpose = 1)
 ```
 
 The above function will:
 
-1. direct the browser to go to the description page for the dataset with DOI 5928,
-1. click to download the `.dta` (Stata) version of this dataset,
-1. move to a separate download window that pops up,
-1. specify that the dataset is to be used for scientific purposes,
-1. accept the terms of use,
-1. click "download",
-1. accept the download without prompting the user,
-1. close the pop-up window
-1. move focus back to the first window, which is now ready for another download.
+1.  direct the browser to go to the description page for the dataset with DOI 5928,
+2.  click to download the `.dta` (Stata) version of this dataset,
+3.  move to a separate download window that pops up,
+4.  specify that the dataset is to be used for scientific purposes,
+5.  accept the terms of use,
+6.  click "download",
+7.  accept the download without prompting the user,
+8.  close the pop-up window
+9.  move focus back to the first window, which is now ready for another download.
 
-Finally, we can now check that the downloaded file is in the folder we
-specified, and then close the browser window and the Selenium server.
+Finally, we can now check that the downloaded file is in the folder we specified, and then close the browser window and the Selenium server.
 
-
-```r
+``` r
 dir("downloads")
 gesis_remDr$Close()
 gesis_remDr$closeServer()
 ```
 
-To simplify further analysis, the package also provides a convenience function 
-for browsing the codebook of a specified dataset. This function does not require
-an active Selenium session, but *does* require that the `xml2` package be
-installed:
+To simplify further analysis, the package also provides a convenience function for browsing the codebook of a specified dataset. This function does not require an active Selenium session, but *does* require that the `xml2` package be installed:
 
-
-```r
+``` r
 browse_codebook(doi = 5928)
 ```
 
-## A more realistic example
+A more realistic example
+------------------------
 
-The workflow described above is clearly more laborious than just downloading
-data sets by hand if you are only downloading a handful of data sets. However,
-many opinion surveys take the form of repeated cross-sections, meaning that each
-time a survey is conducted it is distributed as a separate file. If one is
-interested in analyzing these surveys over time, one therefore needs to download
-a separate data set for each point in time.
+The workflow described above is clearly more laborious than just downloading data sets by hand if you are only downloading a handful of data sets. However, many opinion surveys take the form of repeated cross-sections, meaning that each time a survey is conducted it is distributed as a separate file. If one is interested in analyzing these surveys over time, one therefore needs to download a separate data set for each point in time.
 
-An example of such a repeated cross-section is a study called "Atlantic Trends",
-for which there are annual surveys between 2002 and 2013. We can easily scrape
-the DOI for these data sets.
+An example of such a repeated cross-section is a study called "Atlantic Trends", for which there are annual surveys between 2002 and 2013. We can easily scrape the DOI for these data sets.
 
-
-```r
+``` r
 library(xml2)
 
 # Browsing the gesis website, we find the url for the main page for these studies
@@ -136,15 +96,11 @@ doi <- substr(xml_text(doi_links), 3, 7)
 str(doi)
 ```
 
-```
-##  chr [1:16] "4218" "4219" "4220" "4262" "4518" "4746" ...
-```
+    ##  chr [1:16] "4218" "4219" "4220" "4262" "4518" "4746" ...
 
-Using the `gesis` package just like before, we can now batch download all these
-surveys:
+Using the `gesis` package just like before, we can now batch download all these surveys:
 
-
-```r
+``` r
 # Setup preliminaries
 if(!dir.exists("downloads")) dir.create("downloads")
 gesis_remDr <- setup_gesis(download_dir = "downloads")
@@ -156,11 +112,4 @@ login_gesis(gesis_remDr, user = "myusername", pass = "mypassword")
 lapply(doi, download_dataset, remDr = gesis_remDr)
 ```
 
-Disclaimer: the `gesis` package is neither affiliated with, nor endorsed by, the
-Leibniz Institute for the Social Sciences. I have been unable to find any 
-indication that programmatic access to the website is disallowed under its terms
-of use (indeed, its 
-[guideslines](https://dbk.gesis.org/dbksearch/guidelines.asp) appear to 
-encourage it). That said, I would discourage users from using the `gesis`
-package to put undue pressure on their servers by initiating unnecessary (or
-unnecessarily large) batch downloads.
+Disclaimer: the `gesis` package is neither affiliated with, nor endorsed by, the Leibniz Institute for the Social Sciences. I have been unable to find any indication that programmatic access to the website is disallowed under its terms of use (indeed, its [guidelines](https://dbk.gesis.org/dbksearch/guidelines.asp) appear to encourage it). That said, I would discourage users from using the `gesis` package to put undue pressure on their servers by initiating unnecessary (or unnecessarily large) batch downloads.

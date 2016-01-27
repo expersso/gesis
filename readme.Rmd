@@ -1,13 +1,16 @@
 ---
-title: "Programmatic access to the GESIS Data Catalogue (DBK)"
-date: "`r Sys.Date()`"
-output: html_document
+output:
+  md_document:
+    variant: markdown_github
 ---
+
+# Gesis
 
 [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/gesis)](http://cran.r-project.org/package=gesis)
 [![](http://cranlogs.r-pkg.org/badges/grand-total/gesis)](http://cran.r-project.org/web/packages/gesis)
 
 ## Introduction
+
 The [GESIS Data Catalogue](https://dbk.gesis.org/) offers a repository of 
 approximately 5,000 datasets. Due to a lack of an API, however, accessing these
 datasets in a programmatic and reproducible way is difficult. The `gesis`
@@ -16,7 +19,12 @@ package seeks to solve this issue through the use of
 
 To install the package from github:
 
-```{r, eval=FALSE}
+```{r options}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+
+```{r}
 # install.packages("devtools")
 devtools::install_github("expersso/gesis")
 ```
@@ -46,7 +54,7 @@ can be downloaded without prompting the user. (NB: The `setup_gesis` function
 currently only supports Firefox. See the help file for how to use other
 browsers.)
 
-```{r setup, eval=FALSE}
+```{r setup}
 if(!dir.exists("downloads")) dir.create("downloads")
 gesis_remDr <- setup_gesis(download_dir = "downloads")
 ```
@@ -61,7 +69,7 @@ in a script, the default behavior is to fetch these as options using
 these in your `.Rprofile` by `option("gesis_user" = "myusername", "gesis_pass" =
 "mypassword")`.)
 
-```{r, eval=FALSE}
+```{r}
 login_gesis(gesis_remDr, user = "myusername", pass = "mypassword")
 ```
 
@@ -70,7 +78,7 @@ logged in. Now all we have to do is figure out the unique identifier for the
 data set we are interested in. This is called a "DOI" and can be found on every
 data set's description page.
 
-```{r, eval=FALSE}
+```{r}
 download_dataset(gesis_remDr, doi = 5928, filetype = "dta", purpose = 1)
 ```
 
@@ -89,7 +97,7 @@ The above function will:
 Finally, we can now check that the downloaded file is in the folder we
 specified, and then close the browser window and the Selenium server.
 
-```{r, eval=FALSE}
+```{r}
 dir("downloads")
 gesis_remDr$Close()
 gesis_remDr$closeServer()
@@ -100,7 +108,7 @@ for browsing the codebook of a specified dataset. This function does not require
 an active Selenium session, but *does* require that the `xml2` package be
 installed:
 
-```{r, eval=FALSE}
+```{r}
 browse_codebook(doi = 5928)
 ```
 
@@ -117,7 +125,7 @@ An example of such a repeated cross-section is a study called "Atlantic Trends",
 for which there are annual surveys between 2002 and 2013. We can easily scrape
 the DOI for these data sets.
 
-```{r}
+```{r, eval = TRUE}
 library(xml2)
 
 # Browsing the gesis website, we find the url for the main page for these studies
@@ -132,7 +140,7 @@ str(doi)
 Using the `gesis` package just like before, we can now batch download all these
 surveys:
 
-```{r, eval = FALSE}
+```{r}
 # Setup preliminaries
 if(!dir.exists("downloads")) dir.create("downloads")
 gesis_remDr <- setup_gesis(download_dir = "downloads")
@@ -148,7 +156,7 @@ Disclaimer: the `gesis` package is neither affiliated with, nor endorsed by, the
 Leibniz Institute for the Social Sciences. I have been unable to find any 
 indication that programmatic access to the website is disallowed under its terms
 of use (indeed, its 
-[guideslines](https://dbk.gesis.org/dbksearch/guidelines.asp) appear to 
+[guidelines](https://dbk.gesis.org/dbksearch/guidelines.asp) appear to 
 encourage it). That said, I would discourage users from using the `gesis`
 package to put undue pressure on their servers by initiating unnecessary (or
 unnecessarily large) batch downloads.
