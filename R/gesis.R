@@ -206,3 +206,131 @@ browse_codebook <- function(doi, browseURL = TRUE, ...) {
     return(codebook_link_href)
   }
 }
+
+#' Streamlined downloads from GESIS
+#'
+#' \code{gesis_download} provides a programmatic and reproducible means to download datasets from GESIS
+#'
+#' @param file_id The unique identifier (or optionally a vector of these identifiers)
+#'  for the dataset(s) to be downloaded (see details).
+#' @param email,password Your ICPSR email and password (see details)
+#' @param download_dir The directory (relative to your working directory) to
+#'   which files from the Pew Research Center will be downloaded.
+#' @param msg If TRUE, outputs a message showing which data set is being downloaded.
+#' @param unzip If TRUE, the downloaded zip files will be unzipped.
+#' @param delete_zip If TRUE, the downloaded zip files will be deleted.
+#'
+#' @details
+#'  To avoid requiring others to edit your scripts to insert their own email and
+#'  password, the default is set to fetch this information from the user's
+#'  .Rprofile.  Before running \code{icpsr_download}, then, you should be sure to
+#'  add these options to your .Rprofile substituting your info for the example below:
+#'
+#'  \code{
+#'   options("icpsr_email" = "juanita-herrara@uppermidwest.edu",
+#'          "icpsr_password" = "password123!")
+#'  }
+#'
+#' @return The function returns downloaded files.
+#'
+#' @examples
+#' \dontrun{
+#'  gesis_download(doi = c(3730, 36138))
+#' }
+#'
+#' @export
+gesis_download <- function(doi,
+                           filetype = "dta",
+                           user = getOption("gesis_user"),
+                           pass = getOption("gesis_pass"),
+                           purpose = 1,
+                           download_dir = "gesis_data",
+                           msg = TRUE,
+                           unzip = TRUE,
+                           delete_zip = TRUE) {
+
+    # Set Firefox properties to not open a download dialog
+    fprof <- RSelenium::makeFirefoxProfile(list(
+        browser.download.dir = paste0(getwd(), "/", download_dir),
+        browser.download.folderList = 2L,
+        browser.download.manager.showWhenStarting = FALSE,
+        browser.helperApps.neverAsk.saveToDisk = "application/zip; application/octet-stream"))
+
+    # Set up server as open initial window
+    RSelenium::checkForServer()
+    RSelenium::startServer()
+    remDr <- RSelenium::remoteDriver(extraCapabilities = fprof)
+    remDr$open(silent = TRUE)
+
+    # Log in
+    remDr$navigate("https://dbk.gesis.org/dbksearch/gdesc.asp")
+    remDr$findElement(using = "id", value = "loginContainer")$clickElement()
+
+    remDr$findElement(using = "name", "user")$sendKeysToElement(list(user))
+    remDr$findElement(using = "name", "pass")$sendKeysToElement(list(pass))
+    remDr$findElement(using = "id", "login")$clickElement()
+
+    # Get list of current download directory contents
+    if (!dir.exists(download_dir)) dir.create(download_dir)
+    dd_old <- list.files(download_dir)
+
+    # Loop through files
+    for (i in seq(doi)) {
+        item <- doi[[i]]
+        if(msg) message("Downloading DOI: ", item, sprintf(" (%s)", Sys.time()))
+
+        # build url and purpose
+        url <- paste0("https://dbk.gesis.org/dbksearch/SDesc2.asp?ll=10&notabs=1&no=",
+                      doi)
+
+        purpose <- as.character(purpose)
+
+        if(!purpose %in% as.character(1:6)) {
+            stop("Purpose has to be in the range 1-6 (see help).")
+        }
+
+        # navigate to download page
+        remDr$navigate(url)
+
+        # click filename to download specified filetype
+        file_to_download <- sprintf("//a[contains(text(), '%s')]", filetype)
+        remDr$findElement("xpath", file_to_download)$clickElement()
+
+        # input purpose and terms of use
+        remDr$switchToWindow(remDr$getWindowHandles()[[1]][2])
+
+        # only check "accept terms of purpose" if unchecked
+        try(if(remDr$findElement("name",
+                                 "projectok")$getElementAttribute("checked")[[1]][1] != "true") {
+            remDr$findElement("name", "projectok")$clickElement()
+        }, silent = TRUE)
+
+        remDr$findElement("xpath", sprintf("//option[@value='%s']", purpose))$clickElement()
+        remDr$findElement("xpath", "//input[@value='Download']")$clickElement()
+
+
+        ###HERE
+        # check that download has completed
+        doi_name <- item
+        while (nchar(doi_name) < 5) doi_name <- paste0("0", doi_name) # pad out with zeroes as needed
+        zip_name <- paste0("ICPSR_", doi_name, ".zip")
+        dd_new <- list.files(download_dir)[!list.files(download_dir) %in% dd_old]
+        while (!zip_name %in% dd_new) {
+            Sys.sleep(1)
+            dd_new <- list.files(download_dir)[!list.files(download_dir) %in% dd_old]
+        }
+
+        # switch back to first window
+        remDr$switchToWindow(remDr$getWindowHandles()[[1]])
+    }
+
+    # Close driver
+    remDr$close()
+
+    if (unzip == TRUE) {
+        lapply(dd_new, function(x) unzip(paste0(download_dir, "/", x), exdir = paste0(download_dir, "/")))
+    }
+    if (delete_zip == TRUE) {
+        invisible(file.remove(paste0(download_dir, "/", dd_new)))
+    }
+}
