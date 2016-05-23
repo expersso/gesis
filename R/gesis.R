@@ -245,9 +245,7 @@ gesis_download <- function(doi,
                            pass = getOption("gesis_pass"),
                            purpose = 1,
                            download_dir = "gesis_data",
-                           msg = TRUE,
-                           unzip = TRUE,
-                           delete_zip = TRUE) {
+                           msg = TRUE) {
 
     # Set Firefox properties to not open a download dialog
     fprof <- RSelenium::makeFirefoxProfile(list(
@@ -275,7 +273,7 @@ gesis_download <- function(doi,
     dd_old <- list.files(download_dir)
 
     # Loop through files
-    for (i in seq(doi)) {
+    for (i in seq_along(doi)) {
         item <- doi[[i]]
         if(msg) message("Downloading DOI: ", item, sprintf(" (%s)", Sys.time()))
 
@@ -298,6 +296,7 @@ gesis_download <- function(doi,
 
         # input purpose and terms of use
         remDr$switchToWindow(remDr$getWindowHandles()[[1]][2])
+        Sys.sleep(1)
 
         # only check "accept terms of purpose" if unchecked
         try(if(remDr$findElement("name",
@@ -305,32 +304,22 @@ gesis_download <- function(doi,
             remDr$findElement("name", "projectok")$clickElement()
         }, silent = TRUE)
 
+        # input purpose
         remDr$findElement("xpath", sprintf("//option[@value='%s']", purpose))$clickElement()
         remDr$findElement("xpath", "//input[@value='Download']")$clickElement()
 
-
-        ###HERE
         # check that download has completed
-        doi_name <- item
-        while (nchar(doi_name) < 5) doi_name <- paste0("0", doi_name) # pad out with zeroes as needed
-        zip_name <- paste0("ICPSR_", doi_name, ".zip")
+        doi_pattern <- paste0("ZA", item, "_v[0-9]-[0-9]-[0-9]\\.", filetype,"$")
         dd_new <- list.files(download_dir)[!list.files(download_dir) %in% dd_old]
-        while (!zip_name %in% dd_new) {
+        while (!any(grepl(doi_pattern, dd_new))) {
             Sys.sleep(1)
             dd_new <- list.files(download_dir)[!list.files(download_dir) %in% dd_old]
         }
 
         # switch back to first window
-        remDr$switchToWindow(remDr$getWindowHandles()[[1]])
+        remDr$switchToWindow(remDr$getWindowHandles()[[1]][1])
     }
 
     # Close driver
     remDr$close()
-
-    if (unzip == TRUE) {
-        lapply(dd_new, function(x) unzip(paste0(download_dir, "/", x), exdir = paste0(download_dir, "/")))
-    }
-    if (delete_zip == TRUE) {
-        invisible(file.remove(paste0(download_dir, "/", dd_new)))
-    }
 }
