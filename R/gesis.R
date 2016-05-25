@@ -274,7 +274,7 @@ gesis_download <- function(doi,
 
     # Loop through files
     for (i in seq_along(doi)) {
-        Sys.sleep(1)
+        Sys.sleep(2)
         item <- doi[[i]]
         if(msg) message("Downloading DOI: ", item, sprintf(" (%s)", Sys.time()))
 
@@ -294,10 +294,11 @@ gesis_download <- function(doi,
         # click filename to download specified filetype
         file_to_download <- sprintf("//a[contains(text(), '%s')]", filetype)
         remDr$findElement("xpath", file_to_download)$clickElement()
+        Sys.sleep(1)
 
         # input purpose and terms of use
         remDr$switchToWindow(remDr$getWindowHandles()[[1]][2])
-        Sys.sleep(1)
+
 
         # only check "accept terms of purpose" if unchecked
         try(if(remDr$findElement("name",
@@ -310,10 +311,8 @@ gesis_download <- function(doi,
         remDr$findElement("xpath", "//input[@value='Download']")$clickElement()
 
         # check that download has completed
-        doi_pattern <- paste0("ZA", item, "_v[0-9]-[0-9]-[0-9]\\.", filetype,"$")
-        doi_pattern_zippart <- paste0("ZA", item, "_v[0-9]-[0-9]-[0-9]\\.", filetype,".zip.part$")
         dd_new <- list.files(download_dir)[!list.files(download_dir) %in% dd_old]
-        while (!(any(grepl(doi_pattern, dd_new))|!any(grepl(doi_pattern_zippart, dd_new)))) {
+        while (any(grepl("part", dd_new))) {
             Sys.sleep(1)
             dd_new <- list.files(download_dir)[!list.files(download_dir) %in% dd_old]
         }
