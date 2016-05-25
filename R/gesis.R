@@ -235,7 +235,7 @@ browse_codebook <- function(doi, browseURL = TRUE, ...) {
 #'
 #' @examples
 #' \dontrun{
-#'  gesis_download(doi = c(3730, 36138))
+#'  gesis_download(doi = c(5687, 5928))
 #' }
 #'
 #' @export
@@ -274,6 +274,7 @@ gesis_download <- function(doi,
 
     # Loop through files
     for (i in seq_along(doi)) {
+        Sys.sleep(1)
         item <- doi[[i]]
         if(msg) message("Downloading DOI: ", item, sprintf(" (%s)", Sys.time()))
 
@@ -310,8 +311,9 @@ gesis_download <- function(doi,
 
         # check that download has completed
         doi_pattern <- paste0("ZA", item, "_v[0-9]-[0-9]-[0-9]\\.", filetype,"$")
+        doi_pattern_zippart <- paste0("ZA", item, "_v[0-9]-[0-9]-[0-9]\\.", filetype,".zip.part$")
         dd_new <- list.files(download_dir)[!list.files(download_dir) %in% dd_old]
-        while (!any(grepl(doi_pattern, dd_new))) {
+        while (!(any(grepl(doi_pattern, dd_new))|!any(grepl(doi_pattern_zippart, dd_new)))) {
             Sys.sleep(1)
             dd_new <- list.files(download_dir)[!list.files(download_dir) %in% dd_old]
         }
@@ -322,4 +324,11 @@ gesis_download <- function(doi,
 
     # Close driver
     remDr$close()
+
+    if (any(grepl("zip", dd_new))) {
+        dd_new_zips <- dd_new[grep("zip", dd_new)]
+        lapply(dd_new_zips, function(x) unzip(paste0(download_dir, "/", x),
+                                              exdir = paste0(download_dir, "/")))
+        invisible(file.remove(paste0(download_dir, "/", dd_new_zips)))
+    }
 }
