@@ -252,7 +252,8 @@ gesis_download <- function(doi,
         browser.download.dir = paste0(getwd(), "/", download_dir),
         browser.download.folderList = 2L,
         browser.download.manager.showWhenStarting = FALSE,
-        browser.helperApps.neverAsk.saveToDisk = "application/zip; application/octet-stream"))
+        browser.helperApps.neverAsk.saveToDisk = "application/zip; application/octet-stream; application/pdf",
+        pdfjs.disabled = TRUE))
 
     # Set up server as open initial window
     RSelenium::checkForServer()
@@ -289,6 +290,10 @@ gesis_download <- function(doi,
 
         # navigate to download page
         remDr$navigate(url)
+
+        # get codebook, if available
+        try(remDr$findElement("xpath", "//a[contains(text(), 'cdb.pdf')]")$clickElement(), silent = TRUE)
+        Sys.sleep(1)
 
         # click filename to download specified filetype
         file_to_download <- sprintf("//a[contains(text(), '%s')]", filetype)
