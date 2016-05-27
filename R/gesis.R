@@ -114,7 +114,7 @@ login_gesis <- function(remDr,
 #'   downloading a data set. The options are as follows:
 #'
 #' 1. for scientific research (incl. PhD)
-#' 2. for reserach with commercial mandate
+#' 2. for research with commercial mandate
 #' 3. for teaching as lecturer
 #' 4. for my academic studies
 #' 5. for my final exam (e.g. bachelor or master)
@@ -205,4 +205,160 @@ browse_codebook <- function(doi, browseURL = TRUE, ...) {
   } else {
     return(codebook_link_href)
   }
+}
+
+#' Streamlined downloads from GESIS
+#'
+#' \code{gesis_download} provides a programmatic and reproducible means to download datasets from GESIS
+#'
+#' @param doi The unique identifier (or optionally a vector of these identifiers)
+#'  for the dataset(s) to be downloaded (see details).
+#' @param filetype The filetype to be downloaded (usually only "dta" or "spss" are available).
+#' @param user,pass Your GESIS username and password (see details)
+#' @param purpose The purpose for which you are downloading the data set (see details).
+#' @param download_dir The directory (relative to your working directory) to
+#'   which files from GESIS will be downloaded.
+#' @param msg If TRUE, outputs a message showing which data set is being downloaded.
+#'
+#' @details
+#' Datasets reposited with GESIS are uniquely identified with a
+#'   numberic identifier called a "DOI". This identifier appears both in the URL
+#'   for a dataset's website, and on the website itself.
+#'
+#'   In addition to accepting the terms of use, you need to input a purpose for
+#'   downloading a data set. The options are as follows:
+#'
+#' 1. for scientific research (incl. PhD)
+#' 2. for research with commercial mandate
+#' 3. for teaching as lecturer
+#' 4. for my academic studies
+#' 5. for my final exam (e.g. bachelor or master)
+#' 6. for professional training and qualification
+#'
+#'  To avoid requiring others to edit your scripts to insert their own email and
+#'  password, the default is set to fetch this information from the user's
+#'  .Rprofile.  Before running \code{gesis_download}, then, you should be sure to
+#'  add these options to your .Rprofile substituting your info for the example below:
+#'
+#'  \code{
+#'   options("gesis_user" = "juanita-herrara@uppermidwest.edu",
+#'          "gesis_pass" = "password123!")
+#'  }
+#'
+#' @return The function returns downloaded files.
+#'
+#' @examples
+#' \dontrun{
+#'  gesis_download(doi = c(5900, 5928))
+#' }
+#'
+#' @importFrom utils unzip
+#'
+#' @export
+gesis_download <- function(doi,
+                           filetype = "dta",
+                           user = getOption("gesis_user"),
+                           pass = getOption("gesis_pass"),
+                           purpose = 1,
+                           download_dir = "gesis_data",
+                           msg = TRUE) {
+
+    # Set Firefox properties to not open a download dialog
+    fprof <- RSelenium::makeFirefoxProfile(list(
+        browser.download.dir = paste0(getwd(), "/", download_dir),
+        browser.download.folderList = 2L,
+        browser.download.manager.showWhenStarting = FALSE,
+        browser.helperApps.neverAsk.saveToDisk = "application/zip; application/octet-stream; application/pdf",
+        pdfjs.disabled = TRUE))
+
+    # Set up server as open initial window
+    RSelenium::checkForServer()
+    RSelenium::startServer()
+    remDr <- RSelenium::remoteDriver(extraCapabilities = fprof)
+    remDr$open(silent = TRUE)
+
+    # Log in
+    remDr$navigate("https://dbk.gesis.org/dbksearch/gdesc.asp")
+    remDr$findElement(using = "id", value = "loginContainer")$clickElement()
+
+    remDr$findElement(using = "name", "user")$sendKeysToElement(list(user))
+    remDr$findElement(using = "name", "pass")$sendKeysToElement(list(pass))
+    remDr$findElement(using = "id", "login")$clickElement()
+
+    # Get list of current download directory contents
+    if (!dir.exists(download_dir)) dir.create(download_dir)
+    dd_old <- list.files(download_dir)
+
+    # Loop through items
+    for (i in seq_along(doi)) {
+        item <- doi[[i]]
+        if(msg) message("Downloading DOI: ", item, sprintf(" (%s)", Sys.time()))
+
+        # build url and purpose
+        url <- paste0("https://dbk.gesis.org/dbksearch/SDesc2.asp?ll=10&notabs=1&no=",
+                      item)
+
+        purpose <- as.character(purpose)
+
+        if(!purpose %in% as.character(1:6)) {
+            stop("Purpose has to be in the range 1-6 (see help).")
+        }
+
+        # navigate to download page
+        remDr$navigate(url)
+
+        # get codebook, if available
+        try(remDr$findElement("xpath", "//a[contains(text(), 'cdb.pdf')]")$clickElement(), silent = TRUE)
+        try(remDr$findElement("xpath", "//a[contains(text(), 'cod.pdf')]")$clickElement(), silent = TRUE)
+        Sys.sleep(1)
+
+        # click filename to download specified filetype
+        file_to_download <- sprintf("//a[contains(text(), '%s')]", filetype)
+        remDr$findElement("xpath", file_to_download)$clickElement()
+        Sys.sleep(1)
+
+        # input purpose and terms of use
+        remDr$switchToWindow(remDr$getWindowHandles()[[1]][i+1])
+
+        # only check "accept terms of use" if unchecked
+        try(if(remDr$findElement("name",
+                                 "projectok")$getElementAttribute("checked")[[1]][1] != "true") {
+            remDr$findElement("name", "projectok")$clickElement()
+        }, silent = TRUE)
+
+        # input purpose
+        remDr$findElement("xpath", sprintf("//option[@value='%s']", purpose))$clickElement()
+        remDr$findElement("xpath", "//input[@value='Download']")$clickElement()
+
+        # check that download has completed
+        dd_new <- list.files(download_dir)[!list.files(download_dir) %in% dd_old]
+        while (any(grepl("part", dd_new))) {
+            Sys.sleep(1)
+            dd_new <- list.files(download_dir)[!list.files(download_dir) %in% dd_old]
+        }
+
+        # switch back to first window
+        remDr$switchToWindow(remDr$getWindowHandles()[[1]][1])
+
+    }
+
+    # Close driver
+    remDr$close()
+
+    # Unzip all zipped downloads
+    if (any(grepl("zip", dd_new))) {
+        dd_new_zips <- dd_new[grep("zip", dd_new)]
+        lapply(dd_new_zips, function(x) unzip(paste0(download_dir, "/", x),
+                                              exdir = paste0(download_dir, "/")))
+        invisible(file.remove(paste0(download_dir, "/", dd_new_zips)))
+    }
+
+    # Create a subdirectory for each doi and move files into these subdirectories
+    dd_new <- list.files(download_dir)[!list.files(download_dir) %in% dd_old]
+    for (item in doi) {
+        item_dir <- paste0(download_dir, "/ZA", item)
+        if (!dir.exists(item_dir)) dir.create(item_dir)
+        lapply(dd_new[grepl(item, dd_new)], function(f) file.rename(paste0(download_dir, "/", f), paste0(item_dir, "/", f)))
+    }
+
 }
