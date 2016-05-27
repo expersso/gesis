@@ -235,7 +235,7 @@ browse_codebook <- function(doi, browseURL = TRUE, ...) {
 #'
 #' @examples
 #' \dontrun{
-#'  gesis_download(doi = c(5687, 5928))
+#'  gesis_download(doi = c(5900, 5928))
 #' }
 #'
 #' @export
@@ -272,15 +272,14 @@ gesis_download <- function(doi,
     if (!dir.exists(download_dir)) dir.create(download_dir)
     dd_old <- list.files(download_dir)
 
-    # Loop through files
+    # Loop through items
     for (i in seq_along(doi)) {
-        Sys.sleep(2)
         item <- doi[[i]]
         if(msg) message("Downloading DOI: ", item, sprintf(" (%s)", Sys.time()))
 
         # build url and purpose
         url <- paste0("https://dbk.gesis.org/dbksearch/SDesc2.asp?ll=10&notabs=1&no=",
-                      doi)
+                      item)
 
         purpose <- as.character(purpose)
 
@@ -297,10 +296,9 @@ gesis_download <- function(doi,
         Sys.sleep(1)
 
         # input purpose and terms of use
-        remDr$switchToWindow(remDr$getWindowHandles()[[1]][2])
+        remDr$switchToWindow(remDr$getWindowHandles()[[1]][i+1])
 
-
-        # only check "accept terms of purpose" if unchecked
+        # only check "accept terms of use" if unchecked
         try(if(remDr$findElement("name",
                                  "projectok")$getElementAttribute("checked")[[1]][1] != "true") {
             remDr$findElement("name", "projectok")$clickElement()
@@ -319,15 +317,26 @@ gesis_download <- function(doi,
 
         # switch back to first window
         remDr$switchToWindow(remDr$getWindowHandles()[[1]][1])
+
     }
 
     # Close driver
     remDr$close()
 
+    # Unzip all zipped downloads
     if (any(grepl("zip", dd_new))) {
         dd_new_zips <- dd_new[grep("zip", dd_new)]
         lapply(dd_new_zips, function(x) unzip(paste0(download_dir, "/", x),
                                               exdir = paste0(download_dir, "/")))
         invisible(file.remove(paste0(download_dir, "/", dd_new_zips)))
     }
+
+    # Create a subdirectory for each doi and move files into these subdirectories
+    dd_new <- list.files(download_dir)[!list.files(download_dir) %in% dd_old]
+    for (item in doi) {
+        item_dir <- paste0(download_dir, "/ZA", item)
+        if (!dir.exists(item_dir)) dir.create(item_dir)
+        lapply(dd_new[grepl(item, dd_new)], function(f) file.rename(paste0(download_dir, "/", f), paste0(item_dir, "/", f)))
+    }
+
 }
