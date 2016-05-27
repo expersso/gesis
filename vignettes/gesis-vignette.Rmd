@@ -1,0 +1,83 @@
+---
+title: "gesis: Programmatic access to the GESIS Data Catalogue (DBK)"
+author: "Eric Persson and Frederick Solt"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{icpsrdata: Reproducible Retrieval of Pew Research Center Datasets}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+The [GESIS Data Catalogue](https://dbk.gesis.org/) offers a repository of 
+approximately 5,000 datasets. Due to a lack of an API, however, accessing these
+datasets in a programmatic and reproducible way is difficult. The `gesis`
+package seeks to solve this issue through the use of
+[Selenium](http://www.seleniumhq.org/) and the `RSelenium` package.  
+
+
+## Setup
+
+`gesis` depends on the Firefox browser; if it is not installed, [get it here](https://www.mozilla.org/firefox).
+
+An optional, but recommended, setup step is to add the information GESIS requires to your [.Rprofile](http://www.statmethods.net/interface/customizing.html) as in the following example:
+
+```{r eval = FALSE}
+options("gesis_user" = "juanita-herrera@uppermidwest.edu",
+        "gesis_pass" = "password123!")
+```
+
+The `gesis_download` function will then access the information it needs to pass on to GESIS by default.  This means that researchers will not have to expose their info in their R scripts and that others reproducing their results later will be able to execute those R scripts without modification.  (They will, however, need to enter their own information into their own .Rprofiles, a detail that should be noted in the reproducibility materials to avoid confusion.)
+
+
+## Use
+
+The `gesis_download` function 
+1. opens a Firefox browser pointed to the GESIS Data Catalogue,
+1. enters the required login information,
+1. navigates to the GESIS page of specified dataset,
+1. downloads the dataset's codebook, if one is available,
+1. initiates a download of the dataset in the specified format,
+1. indicates a specified purpose (by default, "scientific purposes") and agrees to the terms and conditions of the download,
+1. downloads the dataset's files to a eponymous subdirectory of a specified directory (or, by default, a `gesis_data` directory in the current working directory).
+
+Datasets are specified using the `doi` argument.  GESIS uses a DOI, that is, a unique number, to identify each of its datasets; this number is consistently listed alongside the dataset's name.  For the [2013 Transatlantic Trends Survey](https://dbk.gesis.org/dbksearch/SDesc2.asp?ll=10&notabs=1&af=&nf=&search=&search2=&db=E&no=5646), for example, the file id is 5646.
+
+To reproducibly download this dataset, then:
+
+```{r eval=FALSE}
+gesis_download(doi = 5646)
+```
+
+
+Many opinion surveys, however, take the form of repeated cross-sections, meaning that each time a survey is conducted it is distributed as a separate file. If one is interested in analyzing these surveys over time, one therefore needs to download a separate data set for each point in time. Transatlantic Trends is one such repeated cross-sectional study: there are annual surveys between 2002 and 2013. We can easily scrape the DOI for these data sets.
+
+```{r}
+library(xml2)
+
+# Browsing the gesis website, we find the url for the main page for these studies
+tt_url <- "https://dbk.gesis.org/dbksearch/GDesc2.asp?no=0074&ll=10&db=d&notabs=1"
+
+tt_page <- read_html(url)
+tt_doi_links <- xml_find_all(page, "//a[contains(text(), 'ZA')]")
+tt_doi <- substr(xml_text(tt_doi_links), 3, 7)
+str(tt_doi)
+```
+
+All of these datasets may be downloaded in a single command by passing a vector of DOI to `doi`:
+
+```{r eval=FALSE}
+gesis_download(doi = tt_doi)
+```
+
+Each of these data sets and their respective codebooks are then found in subdirectories of the `gesis_data` directory within the current working directory; note that this default location may be changed using the `download_dir` argument. They are then ready to be loaded into R using, e.g., `rio::import`.
+
+Disclaimer: the `gesis` package is neither affiliated with, nor endorsed by, the
+Leibniz Institute for the Social Sciences. I have been unable to find any 
+indication that programmatic access to the website is disallowed under its terms
+of use (indeed, its 
+[guideslines](https://dbk.gesis.org/dbksearch/guidelines.asp) appear to 
+encourage it). That said, I would discourage users from using the `gesis`
+package to put undue pressure on their servers by initiating unnecessary (or
+unnecessarily large) batch downloads.
