@@ -307,6 +307,7 @@ gesis_download <- function(doi,
 
         # get codebook, if available
         try(remDr$findElement("xpath", "//a[contains(text(), 'cdb.pdf')]")$clickElement(), silent = TRUE)
+        try(remDr$findElement("xpath", "//a[contains(text(), 'cod.pdf')]")$clickElement(), silent = TRUE)
         Sys.sleep(1)
 
         # click filename to download specified filetype
