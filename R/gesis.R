@@ -252,6 +252,8 @@ browse_codebook <- function(doi, browseURL = TRUE, ...) {
 #'  gesis_download(doi = c(5900, 5928))
 #' }
 #'
+#' @importFrom utils unzip
+#'
 #' @export
 gesis_download <- function(doi,
                            filetype = "dta",
