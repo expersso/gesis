@@ -9,8 +9,11 @@ Description: Provides programmatic access to the GESIS - Leibniz-Institute for
     maintains a large repository of data sets related to the social sciences.
 License: CC0
 LazyData: TRUE
-Suggests: knitr,
+Suggests:
+    knitr,
     rmarkdown,
     xml2
 VignetteBuilder: knitr
-Imports: RSelenium
+Imports:
+    RSelenium
+RoxygenNote: 5.0.1

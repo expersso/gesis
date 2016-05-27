@@ -114,7 +114,7 @@ login_gesis <- function(remDr,
 #'   downloading a data set. The options are as follows:
 #'
 #' 1. for scientific research (incl. PhD)
-#' 2. for reserach with commercial mandate
+#' 2. for research with commercial mandate
 #' 3. for teaching as lecturer
 #' 4. for my academic studies
 #' 5. for my final exam (e.g. bachelor or master)
@@ -211,24 +211,38 @@ browse_codebook <- function(doi, browseURL = TRUE, ...) {
 #'
 #' \code{gesis_download} provides a programmatic and reproducible means to download datasets from GESIS
 #'
-#' @param file_id The unique identifier (or optionally a vector of these identifiers)
+#' @param doi The unique identifier (or optionally a vector of these identifiers)
 #'  for the dataset(s) to be downloaded (see details).
-#' @param email,password Your ICPSR email and password (see details)
+#' @param filetype The filetype to be downloaded (usually only "dta" or "spss" are available).
+#' @param user,pass Your GESIS username and password (see details)
+#' @param purpose The purpose for which you are downloading the data set (see details).
 #' @param download_dir The directory (relative to your working directory) to
-#'   which files from the Pew Research Center will be downloaded.
+#'   which files from GESIS will be downloaded.
 #' @param msg If TRUE, outputs a message showing which data set is being downloaded.
-#' @param unzip If TRUE, the downloaded zip files will be unzipped.
-#' @param delete_zip If TRUE, the downloaded zip files will be deleted.
 #'
 #' @details
+#' Datasets reposited with GESIS are uniquely identified with a
+#'   numberic identifier called a "DOI". This identifier appears both in the URL
+#'   for a dataset's website, and on the website itself.
+#'
+#'   In addition to accepting the terms of use, you need to input a purpose for
+#'   downloading a data set. The options are as follows:
+#'
+#' 1. for scientific research (incl. PhD)
+#' 2. for research with commercial mandate
+#' 3. for teaching as lecturer
+#' 4. for my academic studies
+#' 5. for my final exam (e.g. bachelor or master)
+#' 6. for professional training and qualification
+#'
 #'  To avoid requiring others to edit your scripts to insert their own email and
 #'  password, the default is set to fetch this information from the user's
-#'  .Rprofile.  Before running \code{icpsr_download}, then, you should be sure to
+#'  .Rprofile.  Before running \code{gesis_download}, then, you should be sure to
 #'  add these options to your .Rprofile substituting your info for the example below:
 #'
 #'  \code{
-#'   options("icpsr_email" = "juanita-herrara@uppermidwest.edu",
-#'          "icpsr_password" = "password123!")
+#'   options("gesis_user" = "juanita-herrara@uppermidwest.edu",
+#'          "gesis_pass" = "password123!")
 #'  }
 #'
 #' @return The function returns downloaded files.
