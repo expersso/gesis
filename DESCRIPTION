@@ -12,7 +12,6 @@ LazyData: TRUE
 Suggests:
     knitr,
     rmarkdown,
-    haven,
     testthat
 VignetteBuilder: knitr
 Imports:
