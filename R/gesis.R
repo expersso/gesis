@@ -10,7 +10,8 @@
 #'
 #' @return A session object
 #' @export
-#' @importFrom rvest html_session, html_form, set_values, submit_form
+#' @import rvest
+#' @import xml2
 #'
 #' @examples
 #' \dontrun{s <- login("my_gesis_username", "my_gesis_password")}
@@ -53,29 +54,32 @@ login <- function(username = "", password = "") {
 #' 5. for my final exam (e.g. bachelor or master)
 #' 6. for professional training and qualification
 #'
-#' @return
-#' @export Nothing
-#' @importFrom rvest jump_to, follow_link, html_form, set_values, submit_form
-#' @importFrom httr stop_for_status, content
+#' @return Nothing
+#' @export
+#' @import rvest
+#' @import xml2
+#' @import httr
 #'
 #' @examples
 #' \dontrun{s <- login("my_gesis_username", "my_gesis_password")
 #' download_dataset(s, doi = "0078")}
-download_dataset <- function(s, doi, path = ".", filetype = ".dta", purpose = 1,
-                             quiet = FALSE) {
+download_dataset <- function(s, doi, path = ".", filetype = ".dta",
+                             purpose = 1, quiet = FALSE) {
     for(d in doi) {
 
         url <- paste0("https://dbk.gesis.org/dbksearch/SDesc2.asp?db=E&no=", d)
         s <- jump_to(s, url)
         stop_for_status(s)
 
-        s <- follow_link(s, xpath = sprintf("//a[contains(text(), '%s')]", filetype))
+        s <- suppressMessages(
+            follow_link(s, xpath = sprintf("//a[contains(text(), '%s')]", filetype))
+        )
         stop_for_status(s)
 
         form <- html_form(s)[[2]]
         form <- set_values(form, zweck = 1, projectok = 1)
         form$url <- ""
-        s <- submit_form(s, form)
+        s <- suppressMessages(submit_form(s, form))
         stop_for_status(s)
 
         if(!quiet) message("Downloading DOI: ", d)
@@ -87,33 +91,31 @@ download_dataset <- function(s, doi, path = ".", filetype = ".dta", purpose = 1,
 
 #' Download the codebook for a Gesis data set
 #'
-#' @param s A session object created with login()
 #' @param doi The unique identifier(s) for the data set(s)
 #' @param path Directory to which to download the file
 #' @param quiet Whether to output download message.
 #'
 #' @return Nothing
 #' @export
-#' @importFrom rvest jump_to, follow_link
-#' @importFrom httr stop_for_status, content
+#' @import rvest
+#' @import xml2
+#' @import httr
 #'
 #' @examples
-#' s <- login("my_gesis_username", "my_gesis_password")
-#' download_codebook(s, doi = "0078")
-download_codebook <- function(s, doi, path = ".", quiet = FALSE) {
+#' download_codebook(doi = "0078")
+download_codebook <- function(doi, path = ".", quiet = FALSE) {
     for(d in doi) {
 
         url <- paste0("https://dbk.gesis.org/dbksearch/SDesc2.asp?db=E&no=", d)
-        s <- jump_to(s, url)
-        stop_for_status(s)
-
-        s <- follow_link(s, xpath = "//a[contains(text(), '_cdb')]")
-        stop_for_status(s)
+        page <- read_html(url)
+        node <- html_nodes(page, xpath = "//a[contains(text(), '_cdb')]")
+        node <- paste0("https://dbk.gesis.org/dbksearch/", html_attr(node, "href"))
+        resp <- GET(node)
 
         if(!quiet) message("Downloading codebook for DOI: ", d)
-        filename <- gsub("^.*?\"|\"", "", s$response$headers$`content-disposition`)
+        filename <- gsub("^.*?\"|\"", "", resp$headers$`content-disposition`)
         filename <- file.path(path, filename)
-        writeBin(content(s$response, "raw"), filename)
+        writeBin(content(resp, "raw"), filename)
     }
 }
 
@@ -121,6 +123,9 @@ download_codebook <- function(s, doi, path = ".", quiet = FALSE) {
 #'
 #' @return A dataframe
 #' @export
+#'
+#' @import rvest
+#' @import xml2
 #'
 #' @examples
 #' groups <- get_study_groups()
@@ -133,17 +138,20 @@ get_study_groups <- function() {
     group_no <- gsub("TI", "", group_no)
     value <- html_attr(html_nodes(page, xpath = "//input//parent::a//input"), "value")
 
-    df <- data.frame(group_no, value)
+    df <- data.frame(group_no, value, stringsAsFactors = FALSE)
     class(df) <- c("tbl_df", "tbl", "data.frame")
     df
 }
 
 #' Get a dataframe of all individual data sets within a group of studies
 #'
-#' @param group_no
+#' @param group_no The group number (usually obtained from get_study_groups())
 #'
 #' @return A dataframe
 #' @export
+#'
+#' @import rvest
+#' @import xml2
 #'
 #' @examples
 #' # Get DOIs and titles for all Eurobarometer studies
@@ -160,7 +168,7 @@ get_datasets <- function(group_no) {
     doi <- substr(text, 3, 6)
     title <- substr(text, 8, stop = 10000L)
 
-    df <- data.frame(doi, title)
+    df <- data.frame(doi, title, stringsAsFactors = FALSE)
     class(df) <- c("tbl_df", "tbl", "data.frame")
     df
 }

@@ -1,16 +1,22 @@
 Package: gesis
 Type: Package
 Title: R Client for GESIS Data Catalogue (DBK)
-Version: 0.1
-Date: 2015-11-29
+Version: 0.2
+Date: 2016-08-16
 Authors@R: person("Eric", "Persson", email = "expersso5@gmail.com", role = c("aut", "cre"))
 Description: Provides programmatic access to the GESIS - Leibniz-Institute for
     the Social Sciences Data Catalogue/Datenbestandkatalog (DBK), which
     maintains a large repository of data sets related to the social sciences.
 License: CC0
 LazyData: TRUE
-Suggests: knitr,
+Suggests:
+    knitr,
     rmarkdown,
-    xml2
+    haven,
+    testthat
 VignetteBuilder: knitr
-Imports: RSelenium
+Imports:
+    httr,
+    rvest,
+    xml2
+RoxygenNote: 5.0.1

@@ -2,3 +2,4 @@
 ^\.Rproj\.user$
 ^readme\..*$
 ^cran-comments\.md$
+^\.Renviron$
