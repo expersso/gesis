@@ -41,7 +41,7 @@ head(groups, 10)
     ## 9      0009                  European Values Study (EVS)
     ## 10     0010                               Politbarometer
 
-We see that the Eurobarometer has study group number 10. Let's looks at all available Eurobarometer waves:
+We see that the Eurobarometer has study group number 0008 Let's looks at all available Eurobarometer waves:
 
 ``` r
 eurobars <- get_datasets("0008")
