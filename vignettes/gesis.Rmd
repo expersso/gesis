@@ -23,8 +23,8 @@ groups <- get_study_groups()
 head(groups, 10)
 ```
 
-We see that the Eurobarometer has study group number 10. Let's looks at all available 
-Eurobarometer waves:
+We see that the Eurobarometer has study group number 0008. Let's looks at all
+available Eurobarometer waves:
 
 ```{r eurobar_waves}
 eurobars <- get_datasets("0008")
