@@ -23,7 +23,7 @@ login <- function(username = "", password = "") {
         stop("Please provide username and/or password.", call. = FALSE)
     }
 
-    url <- "https://dbk.gesis.org/dbksearch/index.asp"
+    url <- "https://dbk.gesis.org/dbksearch/login.asp"
     s <- html_session(url)
     form <- html_form(s)[[1]]
     form <- set_values(form, user = username, pass = password)
@@ -76,7 +76,7 @@ download_dataset <- function(s, doi, path = ".", filetype = ".dta",
         )
         stop_for_status(s)
 
-        form <- html_form(s)[[2]]
+        form <- html_form(s)[[1]]
         form <- set_values(form, zweck = 1, projectok = 1)
         form$url <- ""
         s <- suppressMessages(submit_form(s, form))
@@ -131,16 +131,13 @@ download_codebook <- function(doi, path = ".", quiet = FALSE) {
 #' groups <- get_study_groups()
 #' head(groups)
 get_study_groups <- function() {
-    url <- "https://dbk.gesis.org/dbksearch/gdesc.asp"
+    url <- "https://dbk.gesis.org/dbksearch/gdesc.asp?db=e"
     page <- read_html(url)
 
-    group_no <- html_attr(html_nodes(page, xpath = "//input//parent::a//input"), "name")
-    group_no <- gsub("TI", "", group_no)
-    value <- html_attr(html_nodes(page, xpath = "//input//parent::a//input"), "value")
-
-    df <- data.frame(group_no, value, stringsAsFactors = FALSE)
+    node <- html_nodes(page, xpath = "//*[@id='ppagingtab']/div[1]/table")
+    df <- html_table(node)[[1]]
     class(df) <- c("tbl_df", "tbl", "data.frame")
-    df
+    df[, 2:3]
 }
 
 #' Get a dataframe of all individual data sets within a group of studies
@@ -170,5 +167,5 @@ get_datasets <- function(group_no) {
 
     df <- data.frame(doi, title, stringsAsFactors = FALSE)
     class(df) <- c("tbl_df", "tbl", "data.frame")
-    df
+    df[-1, ]
 }

@@ -62,13 +62,13 @@ download_dataset(s = gesis_session, doi = eurobars$doi[1:3],
 
 We can also download the codebooks for the same studies:
 
-```{r codebooks}
+```{r codebooks, eval=FALSE}
 download_codebook(eurobars$doi[1:3], path = "downloads")
 ```
 
 Using the `haven` package we can now read the data sets:
 
-```{r read_data}
+```{r read_data, warning=FALSE}
 library(haven)
 df <- read_dta(files[1])
 dim(df)
