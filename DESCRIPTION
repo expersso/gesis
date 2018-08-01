@@ -7,6 +7,8 @@ Authors@R: person("Eric", "Persson", email = "expersso5@gmail.com", role = c("au
 Description: Provides programmatic access to the GESIS - Leibniz-Institute for
     the Social Sciences Data Catalogue/Datenbestandkatalog (DBK), which
     maintains a large repository of data sets related to the social sciences.
+URL: https://github.com/expersso/gesis
+BugReports: https://github.com/expersso/gesis/issues
 License: CC0
 LazyData: TRUE
 Suggests:
