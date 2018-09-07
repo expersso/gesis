@@ -110,7 +110,7 @@ download_codebook <- function(doi, path = ".", quiet = FALSE) {
         page <- read_html(url)
         node <- html_nodes(page, xpath = "//a[contains(text(), '_cdb')]")
         node <- paste0("https://dbk.gesis.org/dbksearch/", html_attr(node, "href"))
-        resp <- GET(node)
+        resp <- GET(node[1])
 
         if(!quiet) message("Downloading codebook for DOI: ", d)
         filename <- gsub("^.*?\"|\"", "", resp$headers$`content-disposition`)
