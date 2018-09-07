@@ -8,6 +8,8 @@ Description: Provides programmatic access to the GESIS - Leibniz-Institute for
     the Social Sciences Data Catalogue/Datenbestandkatalog (DBK), which
     maintains a large repository of data sets related to the social sciences.
     See <http://www.gesis.org> for more information.
+URL: https://github.com/expersso/gesis
+BugReports: https://github.com/expersso/gesis/issues
 License: CC0
 LazyData: TRUE
 Suggests:
