@@ -45,4 +45,3 @@ Datasets reposited with GESIS are uniquely identified with a
 \dontrun{s <- login("my_gesis_username", "my_gesis_password")
 download_dataset(s, doi = "0078")}
 }
-

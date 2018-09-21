@@ -20,4 +20,3 @@ Get a dataframe of all individual data sets within a group of studies
 eurobars <- get_datasets("0008")
 head(eurobars)
 }
-

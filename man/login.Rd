@@ -18,11 +18,10 @@ A session object
 Log in to the Gesis website
 }
 \details{
-The username and password can also be stored as enviroenment variables
+The username and password can also be stored as environment variables
 "GESIS_USER" and "GESIS_PASS" so as not to store these in plaintext in a
 script.
 }
 \examples{
 \dontrun{s <- login("my_gesis_username", "my_gesis_password")}
 }
-

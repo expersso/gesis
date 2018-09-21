@@ -4,7 +4,7 @@
 #' @param password Your Gesis password
 #'
 #' @details
-#' The username and password can also be stored as enviroenment variables
+#' The username and password can also be stored as environment variables
 #' "GESIS_USER" and "GESIS_PASS" so as not to store these in plaintext in a
 #' script.
 #'
@@ -107,10 +107,12 @@ download_codebook <- function(doi, path = ".", quiet = FALSE) {
     for(d in doi) {
 
         url <- paste0("https://dbk.gesis.org/dbksearch/SDesc2.asp?db=E&no=", d)
+        nodename <- paste0("ZA", d, "_cdb.pdf")
         page <- read_html(url)
         node <- html_nodes(page, xpath = "//a[contains(text(), '_cdb')]")
+        node <- subset(node, html_text(node) == nodename)
         node <- paste0("https://dbk.gesis.org/dbksearch/", html_attr(node, "href"))
-        resp <- GET(node[1])
+        resp <- GET(node)
 
         if(!quiet) message("Downloading codebook for DOI: ", d)
         filename <- gsub("^.*?\"|\"", "", resp$headers$`content-disposition`)

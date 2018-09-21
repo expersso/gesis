@@ -16,4 +16,3 @@ Get a dataframe with all available groups of studies
 groups <- get_study_groups()
 head(groups)
 }
-

@@ -22,4 +22,3 @@ Download the codebook for a Gesis data set
 \examples{
 download_codebook(doi = "0078")
 }
-
