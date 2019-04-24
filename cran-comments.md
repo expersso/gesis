@@ -1,6 +1,10 @@
 ## Test environments
-* ubuntu 14.04 R 3.3.0
+* ubuntu 14.04 R 3.3.5
 * win-builder
+
+# Changes in version 0.2.2
+
+* Fix tests failing on Solaris.
 
 # Changes in version 0.2.1
 

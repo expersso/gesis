@@ -130,11 +130,17 @@ download_codebook <- function(doi, path = ".", quiet = FALSE) {
 #' @import xml2
 #'
 #' @examples
+#' \dontrun{
 #' groups <- get_study_groups()
 #' head(groups)
+#' }
+
 get_study_groups <- function() {
     url <- "https://dbk.gesis.org/dbksearch/gdesc.asp?db=e"
-    page <- read_html(url)
+    page <- httr::GET(url)
+
+    httr::stop_for_status(page)
+    page <- httr::content(page)
 
     node <- html_nodes(page, xpath = "//*[@id='ppagingtab']/div[1]/table")
     df <- html_table(node)[[1]]

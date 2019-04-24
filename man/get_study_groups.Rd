@@ -13,6 +13,8 @@ A dataframe
 Get a dataframe with all available groups of studies
 }
 \examples{
+\dontrun{
 groups <- get_study_groups()
 head(groups)
+}
 }
