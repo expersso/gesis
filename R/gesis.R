@@ -65,6 +65,10 @@ login <- function(username = "", password = "") {
 #' download_dataset(s, doi = "0078")}
 download_dataset <- function(s, doi, path = ".", filetype = ".dta",
                              purpose = 1, quiet = FALSE) {
+
+    # add trailing 0 if GESIS identifier is of the form '990'
+    doi <- ifelse(nchar(doi) == 3, paste0("0", doi), as.character(doi))
+
     for(d in doi) {
 
         url <- paste0("https://dbk.gesis.org/dbksearch/SDesc2.asp?db=E&no=", d)
