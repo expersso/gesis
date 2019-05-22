@@ -65,11 +65,9 @@ login <- function(username = "", password = "") {
 #' download_dataset(s, doi = "0078")}
 download_dataset <- function(s, doi, path = ".", filetype = ".dta",
                              purpose = 1, quiet = FALSE) {
-
-    # add trailing 0 if GESIS identifier is of the form '990'
-    doi <- ifelse(nchar(doi) == 3, paste0("0", doi), as.character(doi))
-
     for(d in doi) {
+
+        d <- get_gesis_id(d, quiet)
 
         url <- paste0("https://dbk.gesis.org/dbksearch/SDesc2.asp?db=E&no=", d)
         s <- jump_to(s, url)
@@ -109,6 +107,8 @@ download_dataset <- function(s, doi, path = ".", filetype = ".dta",
 #' download_codebook(doi = "0078")
 download_codebook <- function(doi, path = ".", quiet = FALSE) {
     for(d in doi) {
+
+        d <- get_gesis_id(d, quiet)
 
         url <- paste0("https://dbk.gesis.org/dbksearch/SDesc2.asp?db=E&no=", d)
         nodename <- paste0("ZA", d, "_cdb.pdf")
@@ -180,4 +180,27 @@ get_datasets <- function(group_no) {
     df <- data.frame(doi, title, stringsAsFactors = FALSE)
     class(df) <- c("tbl_df", "tbl", "data.frame")
     df[-1, ]
+}
+
+#' @param x A DOI or GESIS identifier.
+#' @return Hopefully, a string made of a valid 4-digit GESIS identifier.
+#' @keywords internal
+get_gesis_id <- function(x, quiet = FALSE) {
+
+    # if user submitted a string of the form '10.4232/1.13048',
+    # convert DOI to GESIS identifier
+    if (grepl("/", x)) {
+
+        x <- GET(paste0("https://doi.org/", x))
+        x <- x$all_headers[[1]]$headers$location
+        x <- gsub("(.*)no=(\\d{4})(.*)", "\\2", x)
+
+        if(!quiet) message("Resolved DOI to GESIS identifier: ", x)
+
+    }
+
+    # if GESIS identifier is of the form '990',
+    # add trailing 0 brefore returning
+    ifelse(nchar(x) == 3, paste0("0", x), x)
+
 }
