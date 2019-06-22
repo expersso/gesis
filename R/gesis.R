@@ -34,7 +34,9 @@ login <- function(username = "", password = "") {
 #' Download a Gesis data set
 #'
 #' @param s A session object created with login()
-#' @param doi The unique identifier(s) for the data set(s)
+#' @param doi The unique identifier(s) for the data set(s), which might be its
+#' Digital Object Identifier (DOI), as in '10.4232/1.12959', or its GESIS/ZACAT
+#' identifier, as in '6925'.
 #' @param path Directory to which to download the file
 #' @param filetype The filetype to download (usually available: .dta/.por/.sav)
 #' @param purpose The purpose for downloading the data. See details.
@@ -93,7 +95,9 @@ download_dataset <- function(s, doi, path = ".", filetype = ".dta",
 
 #' Download the codebook for a Gesis data set
 #'
-#' @param doi The unique identifier(s) for the data set(s)
+#' @param doi The unique identifier(s) for the data set(s), which might be its
+#' Digital Object Identifier (DOI), as in '10.4232/1.12959', or its GESIS/ZACAT
+#' identifier, as in '6925'.
 #' @param path Directory to which to download the file
 #' @param quiet Whether to output download message.
 #'
@@ -200,7 +204,7 @@ get_gesis_id <- function(x, quiet = FALSE) {
     }
 
     # if GESIS identifier is of the form '990',
-    # add trailing 0 brefore returning
+    # add trailing 0 before returning
     ifelse(nchar(x) == 3, paste0("0", x), x)
 
 }
