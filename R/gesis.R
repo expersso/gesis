@@ -34,7 +34,9 @@ login <- function(username = "", password = "") {
 #' Download a Gesis data set
 #'
 #' @param s A session object created with login()
-#' @param doi The unique identifier(s) for the data set(s)
+#' @param doi The unique identifier(s) for the data set(s), which might be its
+#' Digital Object Identifier (DOI), as in '10.4232/1.12959', or its GESIS/ZACAT
+#' identifier, as in '6925'.
 #' @param path Directory to which to download the file
 #' @param filetype The filetype to download (usually available: .dta/.por/.sav)
 #' @param purpose The purpose for downloading the data. See details.
@@ -67,6 +69,8 @@ download_dataset <- function(s, doi, path = ".", filetype = ".dta",
                              purpose = 1, quiet = FALSE) {
     for(d in doi) {
 
+        d <- get_gesis_id(d, quiet)
+
         url <- paste0("https://dbk.gesis.org/dbksearch/SDesc2.asp?db=E&no=", d)
         s <- jump_to(s, url)
         stop_for_status(s)
@@ -91,7 +95,9 @@ download_dataset <- function(s, doi, path = ".", filetype = ".dta",
 
 #' Download the codebook for a Gesis data set
 #'
-#' @param doi The unique identifier(s) for the data set(s)
+#' @param doi The unique identifier(s) for the data set(s), which might be its
+#' Digital Object Identifier (DOI), as in '10.4232/1.12959', or its GESIS/ZACAT
+#' identifier, as in '6925'.
 #' @param path Directory to which to download the file
 #' @param quiet Whether to output download message.
 #'
@@ -105,6 +111,8 @@ download_dataset <- function(s, doi, path = ".", filetype = ".dta",
 #' download_codebook(doi = "0078")
 download_codebook <- function(doi, path = ".", quiet = FALSE) {
     for(d in doi) {
+
+        d <- get_gesis_id(d, quiet)
 
         url <- paste0("https://dbk.gesis.org/dbksearch/SDesc2.asp?db=E&no=", d)
         nodename <- paste0("ZA", d, "_cdb.pdf")
@@ -176,4 +184,27 @@ get_datasets <- function(group_no) {
     df <- data.frame(doi, title, stringsAsFactors = FALSE)
     class(df) <- c("tbl_df", "tbl", "data.frame")
     df[-1, ]
+}
+
+#' @param x A DOI or GESIS identifier.
+#' @return Hopefully, a string made of a valid 4-digit GESIS identifier.
+#' @keywords internal
+get_gesis_id <- function(x, quiet = FALSE) {
+
+    # if user submitted a string of the form '10.4232/1.13048',
+    # convert DOI to GESIS identifier
+    if (grepl("/", x)) {
+
+        x <- GET(paste0("https://doi.org/", x))
+        x <- x$all_headers[[1]]$headers$location
+        x <- gsub("(.*)no=(\\d{4})(.*)", "\\2", x)
+
+        if(!quiet) message("Resolved DOI to GESIS identifier: ", x)
+
+    }
+
+    # if GESIS identifier is of the form '990',
+    # add trailing 0 before returning
+    ifelse(nchar(x) == 3, paste0("0", x), x)
+
 }
